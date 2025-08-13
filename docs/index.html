@@ -216,41 +216,55 @@
         .code-editor-wrapper {
             position: relative;
             margin-bottom: 15px;
+            display: flex;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f0f0f0;
         }
 
         .line-numbers {
-            position: absolute;
-            left: 0;
-            top: 0;
             background: #f0f0f0;
             padding: 15px 10px;
-            border-radius: 8px 0 0 8px;
             color: #999;
             font-family: 'Courier New', monospace;
             font-size: 14px;
             line-height: 21px;
             user-select: none;
             text-align: right;
-            min-width: 30px;
+            min-width: 45px;
+            width: 45px;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* スクロールバーを非表示 */
+        .line-numbers::-webkit-scrollbar {
+            width: 0;
+            display: none;
         }
 
         .code-editor {
-            width: 100%;
+            flex: 1;
             min-height: 300px;
-            padding: 15px 15px 15px 50px;
+            padding: 15px;
             font-family: 'Courier New', monospace;
             font-size: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border: none;
             background: #f8f8f8;
-            resize: vertical;
+            resize: none; /* flexboxレイアウトのため、リサイズを無効化 */
             line-height: 21px;
             tab-size: 4;
+            outline: none;
+            overflow-y: auto;
         }
 
-        .code-editor:focus {
-            outline: none;
+        .code-editor-wrapper:focus-within {
             border-color: #667eea;
+        }
+
+        .code-editor-wrapper:focus-within .code-editor {
             background: white;
         }
 
@@ -1203,8 +1217,11 @@ print("発射！")`,
             updateStats();
             
             // エディタのイベントリスナー
-            document.getElementById('codeEditor').addEventListener('input', updateLineNumbers);
-            document.getElementById('codeEditor').addEventListener('scroll', syncLineNumbers);
+            const codeEditor = document.getElementById('codeEditor');
+            codeEditor.addEventListener('input', updateLineNumbers);
+            codeEditor.addEventListener('scroll', syncLineNumbers);
+            codeEditor.addEventListener('keydown', updateLineNumbers);
+            codeEditor.addEventListener('paste', () => setTimeout(updateLineNumbers, 0));
             
             // チャプターリストのイベント
             document.getElementById('chapterList').addEventListener('click', (e) => {
@@ -1566,6 +1583,9 @@ print("発射！")`,
             const lines = editor.value.split('\n').length;
             
             lineNumbers.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+            
+            // 高さを同期
+            lineNumbers.style.height = editor.scrollHeight + 'px';
         }
 
         // 行番号スクロール同期
